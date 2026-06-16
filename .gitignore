@@ -44,5 +44,15 @@ app.*.map.json
 # Analysis artifacts
 /analysis/
 
+# Release builds (track releases separately)
+/releases/*.apk
+/releases/*.aab
+/releases/*.exe
+/releases/*.zip
+/releases/v*/
+
+# Reference APK (original Ticking APK for analysis)
+/releases/reference/
+
 # Local config
 *.local.md

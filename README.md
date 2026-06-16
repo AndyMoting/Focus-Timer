@@ -46,12 +46,12 @@ flutter run -d windows
 
 ## 文档
 
-- **[架构设计](ARCHITECTURE.md)** — 四层分解、Riverpod、Drift 数据库
-- **[功能规划](IMPLEMENTATION_PLAN.md)** — 优先级表、MVP vs 完整版
-- **[发布路线](RELEASE_ROADMAP.md)** — 13 周时间表（Alpha → Beta → Stable）
-- **[数据模型](DATA_MODELS.md)** — 表结构、Drift entities、dayNum 计算
-- **[UI 设计](UI_ARCHITECTURE.md)** — 交互分析、7 种计时模式
-- **[小组件方案](ANDROID_WIDGET_PLAN.md)** — 可交互的 Android 小组件（可选）
+- **[架构设计](docs/ARCHITECTURE.md)** — 四层分解、Riverpod、Drift 数据库
+- **[功能规划](docs/IMPLEMENTATION_PLAN.md)** — 优先级表、MVP vs 完整版
+- **[发布路线](docs/RELEASE_ROADMAP.md)** — 13 周时间表（Alpha → Beta → Stable）
+- **[数据模型](docs/DATA_MODELS.md)** — 表结构、Drift entities、dayNum 计算
+- **[UI 设计](docs/UI_ARCHITECTURE.md)** — 交互分析、7 种计时模式
+- **[小组件方案](docs/ANDROID_WIDGET_PLAN.md)** — 可交互的 Android 小组件（可选）
 
 ---
 
