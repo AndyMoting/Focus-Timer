@@ -26,27 +26,77 @@
 
 ---
 
-## 项目结构
+## 项目结构（实际）
 
 ```
-lib/
-├── main.dart                      # 应用入口
-├── app/
-│   ├── app.dart                   # MaterialApp 配置
-│   └── theme/
-├── domain/                        # 业务逻辑（纯 Dart，无 Flutter 依赖）
-│   ├── entities/
-│   ├── repositories/
-│   └── usecases/
-├── data/                          # 数据访问（Drift DB + Mapper）
-│   ├── database/
-│   ├── repositories/
-│   └── mappers/
-├── presentation/                  # UI + Riverpod
-│   ├── screens/
-│   ├── providers/
-│   └── widgets/
-└── shared/                        # Constants / Extensions / Utils
+Focus Timer/
+├── docs/                          # 项目文档
+│   ├── ARCHITECTURE.md
+│   ├── IMPLEMENTATION_PLAN.md
+│   ├── DATA_MODELS.md
+│   └── ...
+├── lib/
+│   ├── main.dart                  # 应用入口（ProviderScope + MaterialApp）
+│   ├── domain/                    # 业务逻辑（纯 Dart）
+│   │   ├── entities/
+│   │   ├── repositories/
+│   │   └── usecases/
+│   ├── data/                      # 数据访问层
+│   │   ├── database/
+│   │   │   ├── database.dart     # AppDatabase (Drift)
+│   │   │   ├── database.g.dart   # 生成代码
+│   │   │   └── tables.dart       # 表定义 (FocusTime/Tasks/TaskLists)
+│   │   ├── repositories/
+│   │   └── mappers/
+│   ├── presentation/              # UI + Riverpod
+│   │   ├── screens/
+│   │   ├── providers/
+│   │   └── widgets/
+│   └── shared/                    # 工具类
+│       ├── constants/app_constants.dart
+│       └── utils/date_utils.dart  # dayNum 计算
+├── releases/                      # 构建产物（.gitignore）
+│   └── reference/1.18.13.apk
+└── android/, web/, windows/       # 平台配置
+```
+
+---
+
+## 依赖清单
+
+```yaml
+dependencies:
+  flutter_riverpod: ^2.4.0
+  riverpod_annotation: ^2.3.0
+  drift: ^2.15.0
+  sqlite3_flutter_libs: ^0.5.0
+  path_provider: ^2.1.0
+  freezed_annotation: ^2.4.0
+  json_annotation: ^4.8.0
+  flutter_hooks: ^0.20.0
+  hooks_riverpod: ^2.4.0
+
+dev_dependencies:
+  build_runner: ^2.4.0
+  drift_dev: ^2.15.0
+  freezed: ^2.4.0
+  json_serializable: ^6.7.0
+  riverpod_generator: ^2.3.0
+```
+
+---
+
+## 开发命令
+
+```bash
+# 代码生成（Drift + Riverpod + Freezed）
+dart run build_runner build --delete-conflicting-outputs
+
+# 运行（需要先安装 Android SDK）
+flutter run -d android
+
+# 构建 APK
+flutter build apk --debug
 ```
 
 ---
