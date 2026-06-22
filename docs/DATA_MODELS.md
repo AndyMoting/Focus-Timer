@@ -34,6 +34,14 @@
 
 `id` / `taskId` / `listId` / `dayNum` / `startMinute` / `durationMinutes` / `sortOrder`
 
+## TaskPlanSettings
+
+`id` / `startHour` / `endHour` / `segmentMinutes` / `poolListId` / `hideCompletedTasks` / `hideUnplannedTasks`
+
+## StatsSettings
+
+`id` / `visibleCharts` (JSON)
+
 ## dayNum
 
 ```dart
