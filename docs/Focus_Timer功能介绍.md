@@ -569,12 +569,12 @@ JSON 内容包含：
 当前已通过：
 
 - Drift 数据库生成
-- Dart 静态分析
+- Dart 静态分析：`flutter analyze`
+- 完整 Flutter 测试套件：`flutter test`，38 项测试通过
 - 数据恢复服务专项测试：`flutter test test\data_restore_service_test.dart`
 
 当前未完成验证：
 
-- 完整 Flutter 测试套件
 - Android APK 构建超时
 
 构建卡点：
