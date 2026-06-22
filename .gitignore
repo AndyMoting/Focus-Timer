@@ -1,0 +1,83 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code
+.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+/android/build/
+/android/.gradle/
+
+# Analysis artifacts
+/analysis/
+
+# Release builds (track releases separately)
+/releases/*.apk
+/releases/*.aab
+/releases/*.exe
+/releases/*.zip
+/releases/v*/
+
+# Reference APK (original reference APK for analysis)
+/releases/reference/
+
+# Local config
+*.local.md
+appout/
+
+# Local screenshots and reference-app observation artifacts
+/tmp_*/
+/tmp_*.png
+/tmp_*.xml
+/test_*.png
+/group_menu.png
+/focus_home*.xml
+/latest_plan_*.png
+/latest_plan_*.xml
+/tmp_focus*.png
+/tmp_focus*.xml
+/FT/
+
+# Local generated artifacts and one-off helpers
+/.tmp/
+/tmp/
+/ui_mockups/
+/video_frames/
+/tools/extract_video_frames.ps1
+/tools/extract_video_frames_playwright.cjs
+/tools/sync_to_FT.ps1
