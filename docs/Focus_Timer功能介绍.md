@@ -553,9 +553,9 @@ JSON 内容包含：
 - 当前产品不需要这些能力。
 - 无关权限会增加用户不信任，也可能影响系统审核和安装体验。
 
-## 七、当前已接入但仍需打包验证的功能
+## 七、当前已构建但仍需实机验证的功能
 
-以下功能代码已经接入，但还没有成功打出新 APK，因此需要下一轮构建后实机测试：
+以下功能代码已经接入，并已成功打出 release APK。下一步需要安装到 Android 设备后做实机测试：
 
 - JSON 多选恢复预检 + 追加恢复写入
 - 视频选择已有文件
@@ -572,21 +572,24 @@ JSON 内容包含：
 - Dart 静态分析：`flutter analyze`
 - 完整 Flutter 测试套件：`flutter test`，38 项测试通过
 - 数据恢复服务专项测试：`flutter test test\data_restore_service_test.dart`
+- Android release APK 构建：`.\tools\build_apk.ps1 -Mode release -SkipAnalyze -SkipTests`
 
 当前未完成验证：
 
-- Android APK 构建超时
+- Android 实机安装和关键流程回归
+- 正式发布签名包
 
-构建卡点：
+构建结果：
 
-- 构建环境需要能联网下载 Gradle wrapper。
-- 用户本机 PowerShell 需要先成功跑一次构建，让 Gradle 分发包缓存完整。
+- 产物路径：`build\app\outputs\flutter-apk\app-release.apk`
+- 产物大小：约 60.1 MB
+- 当前 release 构建仍使用 debug keystore，正式发布前需要替换签名配置。
 
 ## 八、后续优先级建议
 
 ### 第一优先级：先打包测试
 
-必须先构建新 APK，再测本轮功能。
+已经成功构建新 APK，下一步重点是安装到 Android 设备后测试本轮功能。
 
 建议测试顺序：
 
