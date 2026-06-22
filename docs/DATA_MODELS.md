@@ -27,16 +27,17 @@
 
 ## Tasks
 
-`id` / `listId` / `title` / `note` / `priority` / `isCompleted` / `isPinned` / `isHighlighted`
-`dueAt` / `remindAt` / `estimatedMinutes` / `repeatRule` / `sortOrder` / `color`
+`id` / `listId` / `dayNum` / `title` / `description` / `color` / `state` / `priority`
+`dueDayNum` / `estimatedMinutes` / `isFocus` / `isPinned` / `pinnedAt`
+`reminderAt` / `repeatRule` / `sortOrder` / `completedAt`
 
 ## TaskPlans
 
-`id` / `taskId` / `listId` / `dayNum` / `startMinute` / `durationMinutes` / `sortOrder`
+`id` / `taskId` / `listId` / `dayNum` / `startHour` / `startMinute` / `durationMinutes` / `sortOrder`
 
 ## TaskPlanSettings
 
-`id` / `startHour` / `endHour` / `segmentMinutes` / `poolListId` / `hideCompletedTasks` / `hideUnplannedTasks`
+单行表。`id` / `startMinute` / `endMinute` / `slotMinutes` / `updatedAt`
 
 ## StatsSettings
 
