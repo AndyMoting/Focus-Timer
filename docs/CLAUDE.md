@@ -1,87 +1,77 @@
 # Focus Timer
 
-**项目**: 开源、离线、跨平台的生产力计时应用  
-**状态**: Alpha Phase (W1-W4 进行中)  
+**项目**: 本地优先效率工具 — 待办分组 + 专注计时 + 统计  
+**状态**: V5 reference app Phase 1-3 完成 ✅（Phase 4-6 待做）  
 **发布目标**: v1.0.0 在 W8（13 周）
 
 ---
 
 ## 核心决策
 
-- **定位**: 独立的标准生产力应用（计时器 + 待办 + 分析）
-- **平台**: Flutter 跨平台（Android / Web 优先）
-- **架构**: Riverpod + Drift SQLite + Clean Architecture 四层分解
-- **开源**: MIT License，100% GitHub 开源（不商业化）
-- **发布路线**: W8 GitHub v1.0.0 → W13 应用商店
-- **W9-W10 选择**: Android 小组件 OR GitHub 同步（用户反馈决定）
-- **不做**: 自习室、VIP、三方登录、iOS 小组件
+- **定位**: 本地优先版（无云端、无登录、无会员）
+- **平台**: Flutter 跨平台（Android / Web）
+- **架构**: Riverpod + Drift SQLite + Clean Architecture
+- **底部导航**: 3 Tab（待办 / 计时 / 我）
+- **数据库**: schemaVersion=2，TaskLists 表支持分组管理（color/isDeleted/isDailyReset）
+- **开源**: MIT License
 
 ---
 
-## 设计原则
+## V5 进度（2026-06-18）
 
-- 功能为行业标准（计时、待办、热力图）
-- 代码从零编写（不是反编译 + 改包名）
-- 坦诚做开源产品（无须过度法律考虑）
+✅ **Phase 1**: 数据库迁移 v2 + 分组 Repository + typeSleep=9  
+✅ **Phase 2**: 3 Tab 底部导航（待办|计时|我）  
+✅ **Phase 3**: 分组列表 + 分组内待办 + 分组统计  
+✅ 计时中切换类型即时生效  
+✅ 本地通知 + 后台计时 + 权限提权  
+✅ 热力图（heatmap_calendar_plus）  
+✅ 日倒计时 + 8 色主题  
+✅ APK: 54.7 MB | 8/8 测试通过  
+
+⏳ Phase 4: 计时页 4 卡片重设计  
+⏳ Phase 5: 回收站页面  
+⏳ Phase 6: 我的页面完善  
 
 ---
 
-## 项目结构（实际）
+## 项目结构
 
 ```
-Focus Timer/
-├── docs/                          # 项目文档
-│   ├── ARCHITECTURE.md
-│   ├── IMPLEMENTATION_PLAN.md
-│   ├── DATA_MODELS.md
-│   └── ...
-├── lib/
-│   ├── main.dart                  # 应用入口（ProviderScope + MaterialApp）
-│   ├── domain/                    # 业务逻辑（纯 Dart）
-│   │   ├── entities/
-│   │   ├── repositories/
-│   │   └── usecases/
-│   ├── data/                      # 数据访问层
-│   │   ├── database/
-│   │   │   ├── database.dart     # AppDatabase (Drift)
-│   │   │   ├── database.g.dart   # 生成代码
-│   │   │   └── tables.dart       # 表定义 (FocusTime/Tasks/TaskLists)
-│   │   ├── repositories/
-│   │   └── mappers/
-│   ├── presentation/              # UI + Riverpod
-│   │   ├── screens/
-│   │   ├── providers/
-│   │   └── widgets/
-│   └── shared/                    # 工具类
-│       ├── constants/app_constants.dart
-│       └── utils/date_utils.dart  # dayNum 计算
-├── releases/                      # 构建产物（.gitignore）
-│   └── reference/1.18.13.apk
-└── android/, web/, windows/       # 平台配置
-```
-
----
-
-## 依赖清单
-
-```yaml
-dependencies:
-  flutter_riverpod: ^2.4.0
-  riverpod_annotation: ^2.3.0
-  drift: ^2.15.0
-  sqlite3_flutter_libs: ^0.5.0
-  path_provider: ^2.1.0
-  freezed_annotation: ^2.4.0
-  json_annotation: ^4.8.0
-  flutter_hooks: ^0.20.0
-  hooks_riverpod: ^2.4.0
-
-dev_dependencies:
-  build_runner: ^2.4.0
-  drift_dev: ^2.15.0
-  freezed: ^2.4.0
-  json_serializable: ^6.7.0
-  riverpod_generator: ^2.3.0
+lib/
+├── domain/repositories/
+│   ├── timer_repository.dart
+│   └── task_repository.dart
+├── data/
+│   ├── database/
+│   │   ├── database.dart          # AppDatabase v2
+│   │   └── tables.dart            # FocusTime/Tasks/TaskLists
+│   └── repositories/
+│       ├── timer_repository_impl.dart
+│       └── task_repository_impl.dart
+├── presentation/
+│   ├── providers/
+│   │   ├── timer_provider.dart     # 计时器（通知+后台集成）
+│   │   ├── task_provider.dart      # GroupNotifier + TaskNotifier(family)
+│   │   ├── theme_provider.dart     # 8色主题
+│   │   ├── heatmap_provider.dart   # 热力图数据
+│   │   └── countdown_provider.dart # 日倒计时（文件存储）
+│   └── screens/
+│       ├── home_screen.dart        # 3 Tab 主框架
+│       ├── group_list_screen.dart  # 分组列表
+│       ├── group_detail_screen.dart# 分组内待办
+│       ├── timer_screen.dart       # 计时器
+│       ├── heatmap_screen.dart     # 热力图
+│       ├── stats_screen.dart       # 分组统计
+│       ├── day_countdown_screen.dart
+│       └── profile_screen.dart     # 我的
+└── shared/
+    ├── constants/app_constants.dart
+    ├── services/
+    │   ├── notification_service.dart
+    │   ├── background_timer_service.dart
+    │   └── permission_service.dart
+    ├── utils/date_utils.dart
+    └── widgets/permission_gate.dart
 ```
 
 ---
@@ -89,40 +79,19 @@ dev_dependencies:
 ## 开发命令
 
 ```bash
-# 代码生成（Drift + Riverpod + Freezed）
 dart run build_runner build --delete-conflicting-outputs
-
-# 运行（需要先安装 Android SDK）
 flutter run -d android
-
-# 构建 APK
-flutter build apk --debug
+flutter build apk --release
+flutter test
 ```
 
 ---
 
-## 路线图（13 周）
+## 踩坑记录
 
-| 阶段 | 周数 | 里程碑 | 范围 |
-|------|------|--------|------|
-| Alpha | W1-4 | v0.3 | 计时器 MVP（内部用） |
-| Beta | W5-8 | v1.0.0 | 待办 + 热力图（发布 GitHub） |
-| Stable | W9-13 | v1.1+ | 小组件/GitHub 同步 + 应用商店 |
-
-**关键验证点**:
-- W4 末: 计时精度是否准确？
-- W8 末: 功能足够用吗？（GitHub 发布）
-- W13 末: 用户留存 > 30%？
-
----
-
-## 反编译产物
-
-`analysis/` 目录包含 v1.18.13 APK 完整反编译（apktool + jadx）— 仅用于架构学习参考，不用于代码复制。
-
----
-
-## 版权与开源
-
-- **开源协议**: MIT License
-- **GitHub**: 待创建（初始化 W1 时创建）
+- Drift 表名单数化：`Tasks` → `Task`，`TaskLists` → `TaskList`
+- `showDialog` 内禁用 Hook（useTextEditingController）
+- 切换主题前 `FocusScope.unfocus()` 防输入法弹出
+- `flutter_local_notifications` 需启用 coreLibraryDesugaring
+- `permission_handler` + `shared_preferences` 有 Kotlin 编译冲突 → 改用 dart:io 文件存储
+- `heatmap_calendar_plus` v2.3 API: `colorsets`(Map) 替代 `colorSet`(ColorSet)

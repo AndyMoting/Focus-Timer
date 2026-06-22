@@ -4,12 +4,12 @@
 [![Flutter](https://img.shields.io/badge/Flutter-3.x-blue.svg)](https://flutter.dev)
 [![Status](https://img.shields.io/badge/Status-Alpha-orange.svg)](#roadmap)
 
-开源跨平台生产力应用 — 计时、待办、分析，全在本地。
+开源生产力应用 — 计时、待办、分析，全在本地。当前优先打磨 Android APK。
 
 - ⏱️ 计时器（7 种模式：番茄钟、自由计时、倒计时等）
 - 📝 待办列表（多列表、优先级、分类、归档）
 - 🔥 热力图分析（GitHub 风格的专注时长分布）
-- 📱 跨平台（Android / Web / Windows）
+- 📱 Android-first（Web / Windows 计划后续适配）
 - 💾 本地优先（所有数据在本地 SQLite，无云同步）
 - 🔓 100% 开源（MIT License）
 
@@ -20,7 +20,8 @@
 ### 环境要求
 - Flutter 3.x
 - Dart 3.0+
-- Android 26+ / Web Chrome / Windows 10+
+- Android 11+（minSdk 30）
+- Web / Windows 目前不是主发布目标，数据库平台适配完成后再恢复支持声明
 
 ### 安装
 ```bash
@@ -35,11 +36,8 @@ flutter pub run build_runner build
 # Android
 flutter run -d android
 
-# Web
-flutter run -d web
-
-# Windows
-flutter run -d windows
+# 当前 APK 主线
+flutter build apk --debug
 ```
 
 ---
@@ -51,6 +49,7 @@ flutter run -d windows
 - **[发布路线](docs/RELEASE_ROADMAP.md)** — 13 周时间表（Alpha → Beta → Stable）
 - **[数据模型](docs/DATA_MODELS.md)** — 表结构、Drift entities、dayNum 计算
 - **[UI 设计](docs/UI_ARCHITECTURE.md)** — 交互分析、7 种计时模式
+- **[W2 实现](docs/W2_IMPLEMENTATION.md)** — 计时器核心功能实现记录
 - **[小组件方案](docs/ANDROID_WIDGET_PLAN.md)** — 可交互的 Android 小组件（可选）
 
 ---
@@ -63,7 +62,7 @@ flutter run -d windows
 | **Beta** | W5-8 | v1.0.0 GitHub 发布 | ⏳ 计划中 |
 | **Stable** | W9-13 | 应用商店上线 | ⏳ 计划中 |
 
-**当前**: W1 - 项目初始化 + Drift 数据库搭建
+**当前**: Android APK Alpha - 计时器 + 通知 + 后台计时服务 + 待办分组 + 热力图基础能力。
 
 ---
 

@@ -15,7 +15,7 @@
 └────────────┬────────────────┘
              │
         MethodChannel
-        ("ticking/widget")
+        ("focus_timer/widget")
              │
         ┌────▼──────────────┐
         │ Kotlin 原生层     │
@@ -73,7 +73,7 @@ class FocusWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetId: Int
     ) {
-        val prefs = context.getSharedPreferences("TickingWidget", Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences("FocusTimerWidget", Context.MODE_PRIVATE)
         val currentTime = prefs.getString("currentTime", "00:00:00") ?: "00:00:00"
         val focusName = prefs.getString("focusName", "专注计时") ?: "专注计时"
         val progress = prefs.getFloat("progress", 0f)
@@ -113,9 +113,9 @@ class FocusWidgetProvider : AppWidgetProvider() {
     }
 
     companion object {
-        const val ACTION_PAUSE_FOCUS = "cn.ticking.PAUSE_FOCUS"
-        const val ACTION_RESUME_FOCUS = "cn.ticking.RESUME_FOCUS"
-        const val ACTION_STOP_FOCUS = "cn.ticking.STOP_FOCUS"
+        const val ACTION_PAUSE_FOCUS = "com.focustimer.PAUSE_FOCUS"
+        const val ACTION_RESUME_FOCUS = "com.focustimer.RESUME_FOCUS"
+        const val ACTION_STOP_FOCUS = "com.focustimer.STOP_FOCUS"
     }
 }
 ```
@@ -189,9 +189,9 @@ class FocusWidgetProvider : AppWidgetProvider() {
     android:exported="true">
     <intent-filter>
         <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-        <action android:name="cn.ticking.PAUSE_FOCUS" />
-        <action android:name="cn.ticking.RESUME_FOCUS" />
-        <action android:name="cn.ticking.STOP_FOCUS" />
+        <action android:name="com.focustimer.PAUSE_FOCUS" />
+        <action android:name="com.focustimer.RESUME_FOCUS" />
+        <action android:name="com.focustimer.STOP_FOCUS" />
     </intent-filter>
     <meta-data
         android:name="android.appwidget.provider"
@@ -276,7 +276,7 @@ class TodoWidgetProvider : AppWidgetProvider() {
     }
 
     companion object {
-        const val ACTION_TOGGLE_TASK = "cn.ticking.TOGGLE_TASK"
+        const val ACTION_TOGGLE_TASK = "com.focustimer.TOGGLE_TASK"
     }
 }
 ```
@@ -368,7 +368,7 @@ class HeatmapWidgetProvider : AppWidgetProvider() {
 ```dart
 // flutter/presentation/services/widget_channel_service.dart
 class WidgetChannelService {
-  static const _channel = MethodChannel('cn.ticking/widget');
+  static const _channel = MethodChannel('cn.focus_timer/widget');
 
   static Future<void> updateFocusWidget({
     required String currentTime,
@@ -411,7 +411,7 @@ class WidgetChannelService {
 ### 3.2 Kotlin 端实现
 
 ```kotlin
-// android/app/src/main/kotlin/cn/ticking/WidgetChannelHandler.kt
+// android/app/src/main/kotlin/cn/focus_timer/WidgetChannelHandler.kt
 class WidgetChannelHandler(
     private val context: Context,
     private val database: Database  // Drift 数据库访问
@@ -419,7 +419,7 @@ class WidgetChannelHandler(
     fun setupChannel(flutterEngine: FlutterEngine) {
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
-            "cn.ticking/widget"
+            "cn.focus_timer/widget"
         ).setMethodCallHandler { call, result ->
             when (call.method) {
                 "updateFocusWidget" -> {
@@ -446,7 +446,7 @@ class WidgetChannelHandler(
         progress: Double,
         isRunning: Boolean
     ) {
-        val prefs = context.getSharedPreferences("TickingWidget", Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences("FocusTimerWidget", Context.MODE_PRIVATE)
         prefs.edit().apply {
             putString("currentTime", currentTime)
             putString("focusName", focusName)
@@ -490,7 +490,7 @@ class WidgetChannelHandler(
 ### 3.3 MainActivity 集成
 
 ```kotlin
-// android/app/src/main/kotlin/cn/ticking/MainActivity.kt
+// android/app/src/main/kotlin/cn/focus_timer/MainActivity.kt
 class MainActivity: FlutterActivity() {
     private lateinit var widgetHandler: WidgetChannelHandler
 
@@ -595,11 +595,11 @@ dev_dependencies:
 
 ```gradle
 android {
-    namespace "cn.ticking"
+    namespace "com.focustimer"
     compileSdkVersion 34
 
     defaultConfig {
-        applicationId "cn.ticking"
+        applicationId "com.focustimer"
         minSdkVersion 26  // API 26 以上支持小组件
         targetSdkVersion 34
         // ...
@@ -628,9 +628,9 @@ dependencies {
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="cn.ticking.PAUSE_FOCUS" />
-                <action android:name="cn.ticking.RESUME_FOCUS" />
-                <action android:name="cn.ticking.STOP_FOCUS" />
+                <action android:name="com.focustimer.PAUSE_FOCUS" />
+                <action android:name="com.focustimer.RESUME_FOCUS" />
+                <action android:name="com.focustimer.STOP_FOCUS" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
@@ -643,7 +643,7 @@ dependencies {
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="cn.ticking.TOGGLE_TASK" />
+                <action android:name="com.focustimer.TOGGLE_TASK" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
@@ -705,7 +705,7 @@ W6.5: Android 小组件集成 ← 新增 2.5 周
 ### ✅ 优点
 
 - 完全可交互（暂停/继续/停止）
-- 用户体验接近原版 Ticking
+- 用户体验接近参考应用
 - 可实时更新（无需打开应用）
 - 支持多个小组件同时显示
 

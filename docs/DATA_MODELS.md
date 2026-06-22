@@ -1,5 +1,7 @@
 # Focus Timer 数据模型与数据库架构
 
+> **注意**：本文档描述的是参考 APK（v1.18.13）的字段结构，用于架构学习。**实际实现的 Drift 表（`lib/data/database/tables.dart`）是简化版**，主要差异：PK 改为 integer autoIncrement、去掉 uuid/isDeleted/pauseTime/timeZone 字段、durationMs 直接存表中。
+
 ## 核心表结构
 
 ### 1. focus_time 表（计时记录）

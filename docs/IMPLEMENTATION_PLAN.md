@@ -112,7 +112,7 @@ ORDER BY dayNum
 
 #### 4. 专注模式（防切换） ✅ 部分可实现
 
-**原版功能**（Ticking APK）：
+**原版功能**（reference APK）：
 - 防止按 Home 键切换应用
 - 防止打开最近应用
 - 计时中截图保存
@@ -153,8 +153,8 @@ await notifications.show(
   '本次专注 25 分钟',
   NotificationDetails(
     android: AndroidNotificationDetails(
-      'ticking_channel',
-      'Ticking Notifications',
+      'focus_timer_channel',
+      'Focus Timer Notifications',
       importance: Importance.high,
     ),
   ),
@@ -198,9 +198,9 @@ await notifications.show(
 // 使用 github/pub.dev:github 包
 final github = GitHub(auth: Authentication.withToken(token));
 await github.gists.createGist(
-  description: 'Ticking Backup',
+  description: 'Focus Timer Backup',
   public: false,
-  files: {'ticking_backup.json': ...},
+  files: {'focus_timer_backup.json': ...},
 );
 ```
 
@@ -235,7 +235,7 @@ await github.gists.createGist(
 - [x] 习惯完成度
 
 **⚠️ 限制**：
-- 原版 Ticking 有完整习惯系统（school.json 不做）
+- 参考应用 有完整习惯系统（school.json 不做）
 - Flutter 版可实现基础版本
 - 不做复杂的习惯分析（那需要更多数据表）
 
@@ -428,9 +428,9 @@ W10-W12: 打磨 & 测试
 
 ---
 
-## 与原版 Ticking 的对比
+## 与原版 参考应用的对比
 
-| 功能 | 原版 Ticking | 我们的版本 | 备注 |
+| 功能 | 参考应用 | 我们的版本 | 备注 |
 |------|---------|---------|------|
 | 计时器 | ✅ | ✅ | 100% 复刻 |
 | 待办列表 | ✅ | ✅ | 核心功能复刻 |

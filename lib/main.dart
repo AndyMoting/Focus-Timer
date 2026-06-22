@@ -1,65 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:focus_timer/presentation/screens/home_screen.dart';
+import 'package:focus_timer/presentation/providers/theme_provider.dart';
+import 'package:focus_timer/shared/services/notification_service.dart';
+import 'package:focus_timer/shared/theme/app_theme.dart';
+import 'package:focus_timer/shared/widgets/permission_gate.dart';
 
-void main() {
-  runApp(
-    const ProviderScope(
-      child: MyApp(),
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  SystemChrome.setSystemUIOverlayStyle(
+    focusTimerSystemUiStyle(
+      WidgetsBinding.instance.platformDispatcher.platformBrightness,
     ),
   );
+  await NotificationService.instance.initialize();
+  runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeColor = ref.watch(themeColorProvider);
+    final themeMode = ref.watch(themeModeProvider);
+
     return MaterialApp(
       title: 'Focus Timer',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+      theme: buildFocusTimerTheme(
+        seedColor: themeColor,
+        brightness: Brightness.light,
       ),
-      home: const HomePage(),
-    );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Focus Timer'),
+      darkTheme: buildFocusTimerTheme(
+        seedColor: themeColor,
+        brightness: Brightness.dark,
       ),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              '专注计时器',
-              style: TextStyle(fontSize: 24),
-            ),
-            SizedBox(height: 20),
-            Text(
-              '00:00:00',
-              style: TextStyle(
-                fontSize: 48,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'monospace',
-              ),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        tooltip: '开始',
-        child: const Icon(Icons.play_arrow),
-      ),
+      themeMode: themeMode,
+      home: const PermissionGate(child: HomeScreen()),
     );
   }
 }

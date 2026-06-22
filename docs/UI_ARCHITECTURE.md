@@ -8,7 +8,7 @@
 - Java 层仅做平台桥接（30 个类）
 
 ### 平台通信通道
-- **主通道**: `MethodChannel("ticking")` 
+- **主通道**: `MethodChannel("focus_timer")` 
 - 双向调用：Flutter ↔ Android
 
 ---
@@ -100,7 +100,7 @@
 ## 数据存储
 
 ### SharedPreferences
-**Key**: `TickingWidgetPrefs`
+**Key**: `FocusTimerWidgetPrefs`
 
 | Key | 类型 | 用途 |
 |-----|------|------|

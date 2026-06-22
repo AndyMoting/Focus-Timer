@@ -353,7 +353,7 @@ class Database extends _$Database {
   int get schemaVersion => 1;
 
   static QueryExecutor _openConnection() {
-    return driftDatabase(name: 'ticking_app');
+    return driftDatabase(name: 'focus_timer_app');
   }
 }
 ```

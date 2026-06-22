@@ -29,8 +29,17 @@ dependencies:
   flutter_hooks: ^0.20.0
   hooks_riverpod: ^2.4.0
 
+  # Notifications
+  flutter_local_notifications: ^17.2.3
+
+  # Heatmap
+  heatmap_calendar_plus: ^2.2.0
+
+  # Permissions
+  permission_handler: ^11.3.1
+
   # Utils
-  intl: ^0.19.0
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:
@@ -42,6 +51,7 @@ dev_dependencies:
   drift_dev: ^2.15.0
   freezed: ^2.4.0
   json_serializable: ^6.7.0
+  path_provider_platform_interface: ^2.1.2
   riverpod_generator: ^2.3.0
 
 # For information on the generic Dart part of this file, see the
