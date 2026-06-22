@@ -559,7 +559,7 @@ JSON 内容包含：
 
 构建卡点：
 
-- 当前 Codex shell 不能联网下载 Gradle wrapper。
+- 构建环境需要能联网下载 Gradle wrapper。
 - 用户本机 PowerShell 需要先成功跑一次构建，让 Gradle 分发包缓存完整。
 
 ## 八、后续优先级建议
