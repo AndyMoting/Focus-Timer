@@ -94,8 +94,9 @@ Future<void> _showDailyLogSheet(
                               Expanded(
                                 child: OutlinedButton.icon(
                                   onPressed: () async {
-                                    final picked = await showTimePicker(
+                                    final picked = await showAppTimePicker(
                                       context: context,
+                                      title: '打卡时间',
                                       initialTime: selectedTime,
                                     );
                                     if (picked == null || !context.mounted) {

@@ -101,8 +101,9 @@ Future<void> _showManualEntrySheet(
                               Expanded(
                                 child: OutlinedButton.icon(
                                   onPressed: () async {
-                                    final picked = await showTimePicker(
+                                    final picked = await showAppTimePicker(
                                       context: context,
+                                      title: '开始时间',
                                       initialTime: fields.selectedTime,
                                     );
                                     if (picked == null || !context.mounted) {

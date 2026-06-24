@@ -98,8 +98,9 @@ Future<void> _showRecordManagerSheet(
                               Expanded(
                                 child: OutlinedButton.icon(
                                   onPressed: () async {
-                                    final picked = await showTimePicker(
+                                    final picked = await showAppTimePicker(
                                       context: context,
+                                      title: '开始时间',
                                       initialTime: fields.selectedTime,
                                     );
                                     if (picked == null || !context.mounted) {
@@ -121,8 +122,9 @@ Future<void> _showRecordManagerSheet(
                           const SizedBox(height: 12),
                           OutlinedButton.icon(
                             onPressed: () async {
-                              final picked = await showTimePicker(
+                              final picked = await showAppTimePicker(
                                 context: context,
+                                title: '结束时间',
                                 initialTime: fields.endTimeOfDay,
                               );
                               if (picked == null || !context.mounted) return;

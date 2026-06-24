@@ -18,6 +18,8 @@ final timerRepositoryProvider = Provider<TimerRepository>((ref) {
   return TimerRepositoryImpl(db);
 });
 
+final timerRecordsRevisionProvider = StateProvider<int>((ref) => 0);
+
 class TimerState {
   final int? currentId;
   final int type;
@@ -253,6 +255,7 @@ class TimerNotifier extends StateNotifier<TimerState> {
       ),
     );
     await _loadTodayData();
+    _markTimerRecordsChanged();
   }
 
   Future<void> updateRecordDuration(int id, int durationMs) async {
@@ -271,6 +274,7 @@ class TimerNotifier extends StateNotifier<TimerState> {
       ),
     );
     await _loadTodayData();
+    _markTimerRecordsChanged();
   }
 
   Future<void> updateRecordDetails({
@@ -318,11 +322,13 @@ class TimerNotifier extends StateNotifier<TimerState> {
       ),
     );
     await _loadTodayData();
+    _markTimerRecordsChanged();
   }
 
   Future<void> deleteRecord(int id) async {
     await _repository.deleteRecord(id);
     await _loadTodayData();
+    _markTimerRecordsChanged();
   }
 
   void createTimer({
@@ -520,6 +526,11 @@ class TimerNotifier extends StateNotifier<TimerState> {
       updatedAt: DateTime.now().millisecondsSinceEpoch,
     );
     await _repository.saveTimer(companion);
+    _markTimerRecordsChanged();
+  }
+
+  void _markTimerRecordsChanged() {
+    _ref.read(timerRecordsRevisionProvider.notifier).state++;
   }
 
   void _maybeSendEarlyReminder() {

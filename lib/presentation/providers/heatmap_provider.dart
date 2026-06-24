@@ -410,6 +410,7 @@ final statsDateRangeProvider = Provider<StatsDateRange>((ref) {
 });
 
 final statsSnapshotProvider = FutureProvider<StatsSnapshot>((ref) async {
+  ref.watch(timerRecordsRevisionProvider);
   final range = ref.watch(statsDateRangeProvider);
   final repo = ref.watch(timerRepositoryProvider);
   final taskRepo = ref.watch(taskRepositoryProvider);
@@ -446,6 +447,7 @@ final currentHeatmapMonth = StateProvider<DateTime>((ref) {
 
 final heatmapDataProvider = FutureProvider.family<Map<DateTime, int>, DateTime>(
   (ref, month) async {
+    ref.watch(timerRecordsRevisionProvider);
     final repo = ref.watch(timerRepositoryProvider);
     return repo.getMonthlyHeatmap(month.year, month.month);
   },

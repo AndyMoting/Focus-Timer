@@ -71,10 +71,13 @@ Future<void> _confirmDeleteTaskFromHome(
   final snapshot = await notifier.deleteTask(task.id);
   ref.invalidate(allTaskListProvider);
   if (!context.mounted || snapshot == null) return;
-  ScaffoldMessenger.of(context).showSnackBar(
+  final messenger = ScaffoldMessenger.of(context);
+  messenger.clearSnackBars();
+  messenger.showSnackBar(
     SnackBar(
       content: Text('已删除“${task.title}”'),
       duration: const Duration(seconds: 4),
+      persist: false,
       action: SnackBarAction(
         label: '撤销',
         onPressed: () async {

@@ -118,7 +118,9 @@ extension _GroupCardActions on _GroupCard {
     final remaining = tasks
         .where((task) => task.state != AppConstants.taskStateCompleted)
         .length;
-    if (remaining == 0) return '全部完成 · 共 ${tasks.length} 项';
-    return '$remaining 项未完成 · 共 ${tasks.length} 项';
+    final completed = tasks.length - remaining;
+    if (completed == 0) return '$remaining 项未完成';
+    if (remaining == 0) return '全部完成 · 含已完成 $completed 项';
+    return '$remaining 项未完成 · 含已完成 $completed 项';
   }
 }

@@ -179,8 +179,9 @@ void _showTaskDetailSheet(
                                 lastDate: DateTime(2100),
                               );
                               if (picked == null || !context.mounted) return;
-                              final time = await showTimePicker(
+                              final time = await showAppTimePicker(
                                 context: context,
+                                title: '提醒时间',
                                 initialTime: reminderAt == null
                                     ? TimeOfDay.now()
                                     : TimeOfDay.fromDateTime(

@@ -103,10 +103,13 @@ Future<void> _confirmDeleteSelectedTasks(
   selectedTaskIds.value = <int>{};
   ref.invalidate(allTaskListProvider);
   if (!context.mounted || snapshots.isEmpty) return;
-  ScaffoldMessenger.of(context).showSnackBar(
+  final messenger = ScaffoldMessenger.of(context);
+  messenger.clearSnackBars();
+  messenger.showSnackBar(
     SnackBar(
       content: Text('已删除 ${snapshots.length} 项'),
       duration: const Duration(seconds: 4),
+      persist: false,
       action: SnackBarAction(
         label: '撤销',
         onPressed: () async {

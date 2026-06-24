@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:focus_timer/domain/models/timer_settings.dart';
 import 'package:focus_timer/presentation/providers/timer_settings_provider.dart';
+import 'package:focus_timer/presentation/screens/app_time_picker_sheet.dart';
 
 class TimerSettingsScreen extends ConsumerWidget {
   const TimerSettingsScreen({super.key});
@@ -117,8 +118,9 @@ class _TimerSettingsContent extends ConsumerWidget {
     WidgetRef ref,
     TimerSettingsValue settings,
   ) async {
-    final picked = await showTimePicker(
+    final picked = await showAppTimePicker(
       context: context,
+      title: '新一天开始时间',
       initialTime: TimeOfDay(
         hour: settings.dayStartMinute ~/ 60,
         minute: settings.dayStartMinute % 60,
