@@ -9,7 +9,7 @@ void _startFromRequest(
   final timer = ref.read(timerProvider);
   if (timer.state != AppConstants.stateStop) {
     _showSnack(context, '当前计时结束后再开始');
-    ref.read(homeTabIndexProvider.notifier).state = 1;
+    _openHomeTabFromDetail(context, ref, 1);
     return;
   }
   ref
@@ -23,11 +23,17 @@ void _startFromRequest(
         planId: req.planId,
       );
   ref.read(timerProvider.notifier).startTimer();
-  ref.read(homeTabIndexProvider.notifier).state = 1;
+  _showSnack(context, '已开始计时');
+  _openHomeTabFromDetail(context, ref, 1);
 }
 
 void _showSnack(BuildContext context, String message) {
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(content: Text(message), duration: const Duration(seconds: 1)),
   );
+}
+
+void _openHomeTabFromDetail(BuildContext context, WidgetRef ref, int tabIndex) {
+  ref.read(homeTabIndexProvider.notifier).state = tabIndex;
+  Navigator.of(context).popUntil((route) => route.isFirst);
 }

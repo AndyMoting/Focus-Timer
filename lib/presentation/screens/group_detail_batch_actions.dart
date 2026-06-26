@@ -103,22 +103,16 @@ Future<void> _confirmDeleteSelectedTasks(
   selectedTaskIds.value = <int>{};
   ref.invalidate(allTaskListProvider);
   if (!context.mounted || snapshots.isEmpty) return;
-  final messenger = ScaffoldMessenger.of(context);
-  messenger.clearSnackBars();
-  messenger.showSnackBar(
-    SnackBar(
-      content: Text('已删除 ${snapshots.length} 项'),
-      duration: const Duration(seconds: 4),
-      persist: false,
-      action: SnackBarAction(
-        label: '撤销',
-        onPressed: () async {
-          for (final snapshot in snapshots) {
-            await notifier.restoreDeletedTask(snapshot);
-          }
-          ref.invalidate(allTaskListProvider);
-        },
-      ),
-    ),
+  showTaskUndoSnackBar(
+    context,
+    message: '已删除 ${snapshots.length} 项',
+    onUndo: () async {
+      for (final snapshot in snapshots) {
+        await ref
+            .read(taskListProvider(group.id).notifier)
+            .restoreDeletedTask(snapshot);
+      }
+      ref.invalidate(allTaskListProvider);
+    },
   );
 }

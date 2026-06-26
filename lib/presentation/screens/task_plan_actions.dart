@@ -14,7 +14,7 @@ void _startPlanTimer(
       context,
     ).showSnackBar(const SnackBar(content: Text('当前计时结束后再开始')));
     ref.read(homeTabIndexProvider.notifier).state = 1;
-    Navigator.pop(context);
+    Navigator.of(context).popUntil((route) => route.isFirst);
     return;
   }
   ref
@@ -29,5 +29,5 @@ void _startPlanTimer(
       );
   ref.read(timerProvider.notifier).startTimer();
   ref.read(homeTabIndexProvider.notifier).state = 1;
-  Navigator.pop(context);
+  Navigator.of(context).popUntil((route) => route.isFirst);
 }

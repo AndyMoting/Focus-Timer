@@ -11,6 +11,7 @@ import 'package:focus_timer/presentation/screens/group_detail_screen.dart';
 import 'package:focus_timer/presentation/screens/home_screen.dart';
 import 'package:focus_timer/presentation/screens/stats_screen.dart';
 import 'package:focus_timer/presentation/screens/task_plan_screen.dart';
+import 'package:focus_timer/presentation/screens/task_undo_snackbar.dart';
 import 'package:focus_timer/presentation/screens/todo_color_picker.dart';
 import 'package:focus_timer/presentation/screens/trash_screen.dart';
 import 'package:focus_timer/presentation/providers/timer_provider.dart';
@@ -132,21 +133,21 @@ class GroupListScreen extends HookConsumerWidget {
                 final nextLayout = layout == TodoHomeLayout.list
                     ? TodoHomeLayout.grid
                     : TodoHomeLayout.list;
-                ref
-                    .read(todoHomeLayoutProvider.notifier)
-                    .state = nextLayout;
+                ref.read(todoHomeLayoutProvider.notifier).state = nextLayout;
                 final currentAppearance =
                     ref.read(appAppearanceProvider).valueOrNull ??
                     AppAppearanceSettings.defaults;
-                ref.read(appAppearanceProvider.notifier).save(
-                  AppAppearanceSettings(
-                    themeColor: currentAppearance.themeColor,
-                    themeModeIndex: currentAppearance.themeModeIndex,
-                    todoLayout: nextLayout == TodoHomeLayout.grid
-                        ? 'grid'
-                        : 'list',
-                  ),
-                );
+                ref
+                    .read(appAppearanceProvider.notifier)
+                    .save(
+                      AppAppearanceSettings(
+                        themeColor: currentAppearance.themeColor,
+                        themeModeIndex: currentAppearance.themeModeIndex,
+                        todoLayout: nextLayout == TodoHomeLayout.grid
+                            ? 'grid'
+                            : 'list',
+                      ),
+                    );
               },
             ),
             _QuietIconButton(

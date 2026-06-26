@@ -57,11 +57,31 @@ List<Widget> _taskPlanningActionTiles({
 }) {
   return [
     ListTile(
-      leading: const Icon(Icons.track_changes_outlined),
-      title: const Text('设定目标'),
+      leading: const Icon(Icons.subject_outlined),
+      title: const Text('待办详情'),
       onTap: () {
         Navigator.pop(sheetContext);
         _showTaskDetailSheet(context, ref, group, task);
+      },
+    ),
+    ListTile(
+      leading: const Icon(Icons.notifications_outlined),
+      title: const Text('提醒'),
+      subtitle: task.reminderAt == null
+          ? const Text('未设置')
+          : Text(_formatReminderTime(task.reminderAt!)),
+      onTap: () async {
+        Navigator.pop(sheetContext);
+        await _pickTaskReminder(context, ref, group, task);
+      },
+    ),
+    ListTile(
+      leading: const Icon(Icons.repeat_outlined),
+      title: const Text('重复'),
+      subtitle: Text(_formatRepeatRule(task.repeatRule)),
+      onTap: () {
+        Navigator.pop(sheetContext);
+        _showTaskRepeatSheet(context, ref, group, task);
       },
     ),
     ListTile(
@@ -103,8 +123,8 @@ List<Widget> _taskPlanningActionTiles({
       title: const Text('统计'),
       onTap: () {
         Navigator.pop(sheetContext);
-        ref.read(homeTabIndexProvider.notifier).state = 2;
         _showSnack(context, '已切到统计');
+        _openHomeTabFromDetail(context, ref, 2);
       },
     ),
   ];
@@ -118,19 +138,12 @@ List<Widget> _taskTimerActionTiles({
 }) {
   return [
     _TaskTimerActionTile(
-      icon: Icons.videocam_outlined,
-      title: '视频打卡',
-      type: AppConstants.typeVideoStudy,
-      defaultName: task.title,
-      onRequest: (req) => _startFromRequest(context, ref, req, task),
-      sheetContext: sheetContext,
-    ),
-    _TaskTimerActionTile(
       icon: Icons.timer_outlined,
       title: '自由计时',
       type: AppConstants.typeFreeCount,
       defaultName: task.title,
       onRequest: (req) => _startFromRequest(context, ref, req, task),
+      parentContext: context,
       sheetContext: sheetContext,
     ),
     _TaskTimerActionTile(
@@ -141,6 +154,16 @@ List<Widget> _taskTimerActionTiles({
       initialMinutes: task.estimatedMinutes > 0 ? task.estimatedMinutes : 25,
       durationPresets: const [25, 30, 45, 60],
       onRequest: (req) => _startFromRequest(context, ref, req, task),
+      parentContext: context,
+      sheetContext: sheetContext,
+    ),
+    _TaskTimerActionTile(
+      icon: Icons.videocam_outlined,
+      title: '视频打卡',
+      type: AppConstants.typeVideoStudy,
+      defaultName: task.title,
+      onRequest: (req) => _startFromRequest(context, ref, req, task),
+      parentContext: context,
       sheetContext: sheetContext,
     ),
   ];
@@ -155,14 +178,6 @@ List<Widget> _taskMoreActionTiles({
   required ColorScheme colorScheme,
 }) {
   return [
-    ListTile(
-      leading: const Icon(Icons.subject_outlined),
-      title: const Text('详情'),
-      onTap: () {
-        Navigator.pop(sheetContext);
-        _showTaskDetailSheet(context, ref, group, task);
-      },
-    ),
     ListTile(
       leading: Icon(task.isFocus == 1 ? Icons.star : Icons.star_border),
       title: Text(task.isFocus == 1 ? '取消重点' : '设为重点'),
@@ -235,6 +250,7 @@ class _TaskTimerActionTile extends StatelessWidget {
     required this.type,
     required this.defaultName,
     required this.onRequest,
+    required this.parentContext,
     required this.sheetContext,
     this.initialMinutes,
     this.durationPresets = const [],
@@ -247,6 +263,7 @@ class _TaskTimerActionTile extends StatelessWidget {
   final int? initialMinutes;
   final List<int> durationPresets;
   final ValueChanged<TimerStartRequest> onRequest;
+  final BuildContext parentContext;
   final BuildContext sheetContext;
 
   @override
@@ -256,8 +273,10 @@ class _TaskTimerActionTile extends StatelessWidget {
       title: Text(title),
       onTap: () async {
         Navigator.pop(sheetContext);
+        await Future<void>.delayed(Duration.zero);
+        if (!parentContext.mounted) return;
         final req = await showModalBottomSheet<TimerStartRequest>(
-          context: context,
+          context: parentContext,
           isScrollControlled: true,
           showDragHandle: true,
           builder: (_) => TimerSetupSheet(
@@ -269,9 +288,134 @@ class _TaskTimerActionTile extends StatelessWidget {
             onDurationChanged: null,
           ),
         );
-        if (req == null || !context.mounted) return;
+        if (req == null || !parentContext.mounted) return;
         onRequest(req);
       },
     );
   }
+}
+
+Future<void> _pickTaskReminder(
+  BuildContext context,
+  WidgetRef ref,
+  TaskList group,
+  Task task,
+) async {
+  final picked = await showDatePicker(
+    context: context,
+    initialDate: task.reminderAt == null
+        ? DateTime.now()
+        : DateTime.fromMillisecondsSinceEpoch(task.reminderAt!),
+    firstDate: DateTime(2020),
+    lastDate: DateTime(2100),
+  );
+  if (picked == null || !context.mounted) return;
+
+  final time = await showAppTimePicker(
+    context: context,
+    title: '提醒时间',
+    initialTime: task.reminderAt == null
+        ? TimeOfDay.now()
+        : TimeOfDay.fromDateTime(
+            DateTime.fromMillisecondsSinceEpoch(task.reminderAt!),
+          ),
+  );
+  if (time == null || !context.mounted) return;
+
+  final reminderAt = DateTime(
+    picked.year,
+    picked.month,
+    picked.day,
+    time.hour,
+    time.minute,
+  ).millisecondsSinceEpoch;
+  await _updateTaskFromActionSheet(
+    ref,
+    group,
+    task,
+    dueDayNum: task.dueDayNum ?? picked.difference(DateTime(1970)).inDays,
+    reminderAt: reminderAt,
+  );
+  if (!context.mounted) return;
+  _showSnack(context, '已设置提醒');
+}
+
+void _showTaskRepeatSheet(
+  BuildContext context,
+  WidgetRef ref,
+  TaskList group,
+  Task task,
+) {
+  showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    builder: (sheetContext) {
+      final selected = _normalizeRepeatRule(task.repeatRule);
+      return SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '重复',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+            ...const ['none', 'daily', 'weekly', 'monthly'].map(
+              (value) => ListTile(
+                leading: Icon(
+                  value == selected
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_unchecked,
+                ),
+                title: Text(_formatRepeatRule(value)),
+                selected: value == selected,
+                onTap: () async {
+                  Navigator.pop(sheetContext);
+                  await _updateTaskFromActionSheet(
+                    ref,
+                    group,
+                    task,
+                    repeatRule: value,
+                  );
+                  if (context.mounted) _showSnack(context, '已更新重复');
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+Future<void> _updateTaskFromActionSheet(
+  WidgetRef ref,
+  TaskList group,
+  Task task, {
+  int? dueDayNum,
+  int? reminderAt,
+  String? repeatRule,
+}) {
+  return ref
+      .read(taskListProvider(group.id).notifier)
+      .updateTaskDetails(
+        task.id,
+        title: task.title,
+        description: task.description ?? '',
+        priority: task.priority,
+        dueDayNum: dueDayNum ?? task.dueDayNum,
+        estimatedMinutes: task.estimatedMinutes,
+        isFocus: task.isFocus == 1,
+        isPinned: task.isPinned == 1,
+        reminderAt: reminderAt ?? task.reminderAt,
+        repeatRule: repeatRule ?? task.repeatRule,
+      );
 }

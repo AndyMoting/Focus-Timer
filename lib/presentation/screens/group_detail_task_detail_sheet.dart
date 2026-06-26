@@ -94,34 +94,6 @@ void _showTaskDetailSheet(
                       ),
                     ),
                     const SizedBox(height: 12),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('重点待办'),
-                      value: isFocus,
-                      onChanged: (value) => setState(() => isFocus = value),
-                    ),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('置顶待办'),
-                      value: isPinned,
-                      onChanged: (value) => setState(() => isPinned = value),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '待办颜色',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TaskColorSwatches(
-                      selectedColor: taskColor,
-                      fallbackColor: group.color,
-                      onChanged: (value) => setState(() => taskColor = value),
-                    ),
-                    const SizedBox(height: 4),
                     Row(
                       children: [
                         Expanded(
@@ -238,6 +210,34 @@ void _showTaskDetailSheet(
                       onChanged: (value) {
                         if (value != null) setState(() => repeatRule = value);
                       },
+                    ),
+                    const SizedBox(height: 18),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('重点待办'),
+                      value: isFocus,
+                      onChanged: (value) => setState(() => isFocus = value),
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('置顶待办'),
+                      value: isPinned,
+                      onChanged: (value) => setState(() => isPinned = value),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '待办颜色',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TaskColorSwatches(
+                      selectedColor: taskColor,
+                      fallbackColor: group.color,
+                      onChanged: (value) => setState(() => taskColor = value),
                     ),
                     const SizedBox(height: 18),
                     FilledButton.icon(

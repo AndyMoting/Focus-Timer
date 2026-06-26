@@ -2,6 +2,7 @@ package com.focustimer.focus_timer
 
 import android.app.Activity
 import android.app.AlarmManager
+import android.app.NotificationManager
 import android.content.ClipData
 import android.content.ActivityNotFoundException
 import android.content.ContentValues
@@ -499,6 +500,8 @@ class TimerPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAwar
     private fun cancelTaskReminder(context: Context, taskId: Int) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         alarmManager.cancel(taskReminderIntent(context, taskId, ""))
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(TaskReminderReceiver.NOTIFICATION_ID_OFFSET + taskId)
     }
 
     private fun taskReminderIntent(context: Context, taskId: Int, title: String): PendingIntent {

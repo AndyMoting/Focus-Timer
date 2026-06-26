@@ -37,17 +37,11 @@ Future<void> _deleteTaskWithUndo(
   final notifier = ref.read(taskListProvider(group.id).notifier);
   final snapshot = await notifier.deleteTask(task.id);
   if (!context.mounted || snapshot == null) return;
-  final messenger = ScaffoldMessenger.of(context);
-  messenger.clearSnackBars();
-  messenger.showSnackBar(
-    SnackBar(
-      content: Text('已删除“${task.title}”'),
-      duration: const Duration(seconds: 4),
-      persist: false,
-      action: SnackBarAction(
-        label: '撤销',
-        onPressed: () => notifier.restoreDeletedTask(snapshot),
-      ),
-    ),
+  showTaskUndoSnackBar(
+    context,
+    message: '已删除“${task.title}”',
+    onUndo: () => ref
+        .read(taskListProvider(group.id).notifier)
+        .restoreDeletedTask(snapshot),
   );
 }

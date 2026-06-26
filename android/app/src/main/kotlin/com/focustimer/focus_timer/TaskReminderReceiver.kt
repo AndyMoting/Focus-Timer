@@ -12,6 +12,7 @@ class TaskReminderReceiver : BroadcastReceiver() {
     companion object {
         const val EXTRA_TASK_ID = "taskId"
         const val EXTRA_TITLE = "title"
+        const val NOTIFICATION_ID_OFFSET = 10_000
         private const val CHANNEL_ID = "task_reminder"
     }
 
@@ -48,6 +49,6 @@ class TaskReminderReceiver : BroadcastReceiver() {
             .setAutoCancel(true)
             .setShowWhen(true)
             .build()
-        manager.notify(10_000 + taskId, notification)
+        manager.notify(NOTIFICATION_ID_OFFSET + taskId, notification)
     }
 }

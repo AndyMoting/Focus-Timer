@@ -13,3 +13,12 @@ String _formatDateTime(int timestampMs) {
   final minute = date.minute.toString().padLeft(2, '0');
   return '${date.year}.$month.$day $hour:$minute';
 }
+
+String _formatRepeatRule(String repeatRule) {
+  return switch (_normalizeRepeatRule(repeatRule)) {
+    'daily' => '每天',
+    'weekly' => '每周',
+    'monthly' => '每月',
+    _ => '不重复',
+  };
+}

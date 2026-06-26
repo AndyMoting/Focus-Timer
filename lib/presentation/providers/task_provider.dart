@@ -6,6 +6,7 @@ import 'package:focus_timer/domain/models/task_plan_settings.dart';
 import 'package:focus_timer/domain/repositories/task_repository.dart';
 import 'package:focus_timer/presentation/providers/database_provider.dart';
 import 'package:focus_timer/presentation/providers/theme_provider.dart';
+import 'package:focus_timer/presentation/providers/timer_settings_provider.dart';
 import 'package:focus_timer/shared/constants/app_constants.dart';
 import 'package:focus_timer/shared/services/background_timer_service.dart';
 import 'package:focus_timer/shared/utils/date_utils.dart' as app_date;
@@ -19,14 +20,12 @@ final hideCompletedTasksProvider = StateProvider<bool>((ref) => true);
 
 enum TodoHomeLayout { list, grid }
 
-final todoHomeLayoutProvider = StateProvider<TodoHomeLayout>(
-  (ref) {
-    final appearance = ref.watch(appAppearanceProvider).valueOrNull;
-    return appearance?.todoLayout == 'grid'
-        ? TodoHomeLayout.grid
-        : TodoHomeLayout.list;
-  },
-);
+final todoHomeLayoutProvider = StateProvider<TodoHomeLayout>((ref) {
+  final appearance = ref.watch(appAppearanceProvider).valueOrNull;
+  return appearance?.todoLayout == 'grid'
+      ? TodoHomeLayout.grid
+      : TodoHomeLayout.list;
+});
 
 const _preserveTaskColor = Object();
 
@@ -63,6 +62,7 @@ class GroupNotifier extends StateNotifier<AsyncValue<List<TaskList>>> {
       app_date.DateUtils.todayDayNum,
     );
     if (resetCount > 0) {
+      await rescheduleFutureReminders();
       await loadGroups();
       _ref.invalidate(taskListProvider);
       _ref.invalidate(allTaskListProvider);
@@ -137,8 +137,15 @@ class GroupNotifier extends StateNotifier<AsyncValue<List<TaskList>>> {
   }
 
   Future<void> completeAllTasks() async {
+    final activeTasks = await _repo.getTasksByActiveLists();
     await _repo.completeAllActiveTasks();
+    for (final task in activeTasks) {
+      if (task.reminderAt != null) {
+        await BackgroundTimerService().cancelTaskReminder(task.id);
+      }
+    }
     await loadGroups();
+    _ref.invalidate(allTaskListProvider);
   }
 
   Future<List<int>> moveEmptyGroupsToTrash() async {
@@ -302,6 +309,7 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<Task>>> {
 
   Future<void> createTask(String title) async {
     final now = DateTime.now().millisecondsSinceEpoch;
+    final dayStartMinute = await _readDayStartMinute();
     final existingTasks =
         state.valueOrNull ?? await _repo.getTasksByList(_listId);
     var nextSortOrder = 0;
@@ -312,7 +320,7 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<Task>>> {
     }
     final task = TasksCompanion.insert(
       listId: _listId,
-      dayNum: DateTime.now().difference(DateTime(1970)).inDays,
+      dayNum: app_date.DateUtils.todayDayNumWithStartMinute(dayStartMinute),
       title: title,
       sortOrder: Value(nextSortOrder),
       createdAt: now,
@@ -380,6 +388,11 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<Task>>> {
     final normalized = title.trim();
     if (normalized.isEmpty) return;
     final now = DateTime.now().millisecondsSinceEpoch;
+    final previousTasks =
+        state.valueOrNull ?? await _repo.getTasksByList(_listId);
+    final previousTask = previousTasks
+        .where((task) => task.id == id)
+        .firstOrNull;
     await _repo.updateTask(
       TasksCompanion(
         id: Value(id),
@@ -403,8 +416,11 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<Task>>> {
         updatedAt: Value(now),
       ),
     );
-    if (reminderAt == null) {
+    if (previousTask?.reminderAt != null) {
       await BackgroundTimerService().cancelTaskReminder(id);
+    }
+    if (reminderAt == null) {
+      return _refreshTaskViews();
     } else {
       await BackgroundTimerService().scheduleTaskReminder(
         taskId: id,
@@ -527,6 +543,15 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<Task>>> {
   Future<void> _refreshTaskViews() async {
     await loadTasks();
     await _ref.read(allTaskListProvider.notifier).loadTasks();
+  }
+
+  Future<int> _readDayStartMinute() async {
+    try {
+      final settings = await _ref.read(timerSettingsProvider.future);
+      return settings.normalized().dayStartMinute;
+    } catch (_) {
+      return 0;
+    }
   }
 
   Future<void> _createNextRepeatedTask(Task source) async {

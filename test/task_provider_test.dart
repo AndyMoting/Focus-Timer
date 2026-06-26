@@ -1,17 +1,37 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:focus_timer/data/database/database.dart';
+import 'package:focus_timer/domain/models/timer_settings.dart';
 import 'package:focus_timer/presentation/providers/database_provider.dart';
 import 'package:focus_timer/presentation/providers/task_provider.dart';
 import 'package:focus_timer/shared/constants/app_constants.dart';
+import 'package:focus_timer/shared/utils/date_utils.dart' as app_date;
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   late AppDatabase db;
   late ProviderContainer container;
+  late Directory tempDir;
+  const timerChannel = MethodChannel('com.focustimer/timer');
+  final timerCalls = <MethodCall>[];
 
-  setUp(() {
+  setUp(() async {
+    tempDir = await Directory.systemTemp.createTemp('focus_timer_task_test_');
+    PathProviderPlatform.instance = _FakePathProvider(tempDir.path);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(timerChannel, (call) async {
+          timerCalls.add(call);
+          return null;
+        });
+    timerCalls.clear();
     db = AppDatabase.forTesting(NativeDatabase.memory());
     container = ProviderContainer(
       overrides: [databaseProvider.overrideWithValue(db)],
@@ -21,6 +41,11 @@ void main() {
   tearDown(() async {
     container.dispose();
     await db.close();
+    if (await tempDir.exists()) {
+      await tempDir.delete(recursive: true);
+    }
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(timerChannel, null);
   });
 
   test(
@@ -130,6 +155,43 @@ void main() {
     expect(tasks?.map((task) => task.title), ['第一项', '第二项', '第三项']);
   });
 
+  test('task provider uses day start setting when creating tasks', () async {
+    final nowDate = DateTime.now();
+    final currentMinute = nowDate.hour * 60 + nowDate.minute;
+    if (currentMinute >= 23 * 60 + 59) {
+      return;
+    }
+    final dayStartMinute = currentMinute + 1;
+    await File('${tempDir.path}/timer_settings.json').writeAsString(
+      jsonEncode(
+        TimerSettingsValue.defaults
+            .copyWith(dayStartMinute: dayStartMinute)
+            .toJson(),
+      ),
+    );
+    final expectedDayNum = app_date.DateUtils.todayDayNumWithStartMinute(
+      dayStartMinute,
+    );
+    expect(expectedDayNum, lessThan(app_date.DateUtils.todayDayNum));
+
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final repo = container.read(taskRepositoryProvider);
+    final groupId = await repo.createList(
+      TaskListsCompanion.insert(
+        name: '跨日起点',
+        color: const Value(0xFF4F6FA8),
+        createdAt: now,
+        updatedAt: now,
+      ),
+    );
+    final notifier = container.read(taskListProvider(groupId).notifier);
+
+    await notifier.createTask('凌晨待办');
+
+    final task = container.read(taskListProvider(groupId)).valueOrNull!.single;
+    expect(task.dayNum, expectedDayNum);
+  });
+
   test('task provider can restore a deleted task', () async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final repo = container.read(taskRepositoryProvider);
@@ -157,6 +219,65 @@ void main() {
     expect(tasks?.single.title, '误删任务');
     expect(tasks?.single.id, taskId);
   });
+
+  test(
+    'task provider cancels reminder on delete and schedules it after restore',
+    () async {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final reminderAt = now + const Duration(hours: 2).inMilliseconds;
+      final repo = container.read(taskRepositoryProvider);
+      final groupId = await repo.createList(
+        TaskListsCompanion.insert(
+          name: '提醒分组',
+          color: const Value(0xFF4F6FA8),
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+      final notifier = container.read(taskListProvider(groupId).notifier);
+      await notifier.createTask('提醒待办');
+
+      final task = container
+          .read(taskListProvider(groupId))
+          .valueOrNull!
+          .single;
+      await notifier.updateTaskDetails(
+        task.id,
+        title: task.title,
+        description: task.description,
+        priority: task.priority,
+        dueDayNum: task.dueDayNum,
+        estimatedMinutes: task.estimatedMinutes,
+        isFocus: task.isFocus == 1,
+        isPinned: task.isPinned == 1,
+        reminderAt: reminderAt,
+        repeatRule: task.repeatRule,
+      );
+      expect(
+        timerCalls.where((call) => call.method == 'scheduleTaskReminder'),
+        hasLength(1),
+      );
+
+      timerCalls.clear();
+      final snapshot = await notifier.deleteTask(task.id);
+
+      expect(snapshot, isNotNull);
+      expect(timerCalls, hasLength(1));
+      expect(timerCalls.single.method, 'cancelTaskReminder');
+      expect(timerCalls.single.arguments, containsPair('taskId', task.id));
+
+      timerCalls.clear();
+      await notifier.restoreDeletedTask(snapshot!);
+
+      expect(timerCalls, hasLength(1));
+      expect(timerCalls.single.method, 'scheduleTaskReminder');
+      expect(timerCalls.single.arguments, containsPair('taskId', task.id));
+      expect(
+        timerCalls.single.arguments,
+        containsPair('reminderAtMs', reminderAt),
+      );
+    },
+  );
 
   test('task provider updates details, duplicates, and moves tasks', () async {
     final now = DateTime.now().millisecondsSinceEpoch;
@@ -207,4 +328,19 @@ void main() {
     expect(tasks.single.isFocus, 1);
     expect(targetTasks.single.id, taskId);
   });
+}
+
+class _FakePathProvider extends PathProviderPlatform {
+  final String path;
+
+  _FakePathProvider(this.path);
+
+  @override
+  Future<String?> getApplicationDocumentsPath() async => path;
+
+  @override
+  Future<String?> getApplicationSupportPath() async => path;
+
+  @override
+  Future<String?> getTemporaryPath() async => path;
 }

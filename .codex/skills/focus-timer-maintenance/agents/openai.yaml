@@ -1,0 +1,7 @@
+interface:
+  display_name: "Focus Timer Maintenance"
+  short_description: "Focus Timer build, test, ADB, and docs workflow"
+  default_prompt: "Use $focus-timer-maintenance to run Focus Timer Android regression checks, inspect adb/logcat, and update the docs."
+
+policy:
+  allow_implicit_invocation: true
